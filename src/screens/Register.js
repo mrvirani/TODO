@@ -1,71 +1,68 @@
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
 import React, {useState} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomInput from '../components/atoms/CustomInput';
+import CustomButton from '../components/atoms/CustomButton';
+import {showSuccessToast} from '../utils/toastUtils';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const navigation = useNavigation();
 
-  const handleRegister = () => {
-    const payload = {
-      name,
-      password,
-      confirmPassword,
-    };
-    console.log('Register Data:', payload);
-
-    if (!name || password !== confirmPassword) {
+  const handleRegister = async () => {
+    if (!name || !password || !confirmPassword) {
+      setError('All fields are required.');
       return;
-    } else {
-      navigation.reset({index: 0, routes: [{name: 'Home', params: payload}]});
     }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    const payload = {name, password};
+    await AsyncStorage.setItem('userData', JSON.stringify(payload));
+    setError('');
+    showSuccessToast('User Login Successfully!!');
+    navigation.reset({index: 0, routes: [{name: 'Home', params:payload}]});
   };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Register</Text>
-      <TextInput
+      <Text style={styles.title}>Register</Text>
+      <CustomInput
         placeholder="Name"
         value={name}
-        onChangeText={text => setName(text)}
-        style={styles.inputText}
-        placeholderTextColor={'gray'}
+        onChangeText={setName}
+        error={error.includes('match') ? '' : error}
       />
-      <TextInput
+      <CustomInput
         placeholder="Password"
         value={password}
-        onChangeText={text => setPassword(text)}
-        secureTextEntry={true}
-        style={styles.inputText}
-        placeholderTextColor={'gray'}
+        onChangeText={setPassword}
+        secureTextEntry
+        error={error}
       />
-      <TextInput
+      <CustomInput
         placeholder="Confirm Password"
         value={confirmPassword}
-        onChangeText={text => setConfirmPassword(text)}
-        secureTextEntry={true}
-        style={styles.inputText}
-        placeholderTextColor={'gray'}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+        error={error}
       />
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Register</Text>
-      </TouchableOpacity>
-
-      <View style={styles.lineContainer}>
-        <Text style={styles.staticText}>Already have an account!!</Text>
+      <CustomButton title="Register" onPress={handleRegister} />
+      <Text style={styles.link}>
+        Already have an account?{' '}
         <Text
-          style={styles.loginText}
+          style={{color: 'black', fontStyle: 'normal'}}
           onPress={() => navigation.navigate('Login')}>
+          {' '}
           Login
         </Text>
-      </View>
+      </Text>
     </View>
   );
 };
@@ -78,44 +75,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
   },
-  titleText: {
-    textAlign: 'center',
+  title: {
     fontSize: 28,
-    color: 'black',
-    marginVertical: 10,
-  },
-  button: {
-    padding: 15,
-    alignItems: 'center',
-    backgroundColor: 'black',
-    borderRadius: 10,
-    marginVertical: 10,
-  },
-  buttonText: {
     textAlign: 'center',
-    color: 'white',
+    marginBottom: 20,
   },
-  inputText: {
-    padding: 16,
-    borderRadius: 10,
-    borderColor: 'gray',
-    borderWidth: 0.8,
-    marginVertical: 4,
-    color: 'black',
-  },
-  lineContainer: {
-    flexDirection: 'row',
-    marginTop: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+  link: {
     color: 'gray',
-  },
-  staticText: {
+    textAlign: 'center',
+    marginTop: 20,
     fontStyle: 'italic',
-    marginHorizontal: 4,
-  },
-  loginText: {
-    color: 'black',
-    fontWeight: '700',
   },
 });

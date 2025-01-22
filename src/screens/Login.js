@@ -1,58 +1,62 @@
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
 import React, {useState} from 'react';
-import { useNavigation } from '@react-navigation/native';
+import {View, Text, StyleSheet} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomInput from '../components/atoms/CustomInput';
+import CustomButton from '../components/atoms/CustomButton';
+import { showSuccessToast } from '../utils/toastUtils';
 
 const Login = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const navigation = useNavigation()
+  const [error, setError] = useState('');
+  const navigation = useNavigation();
 
-  const handleLogin = () => {
-    const payload = {
-      name,
-      password,
-    };
-    
+  const handleLogin = async () => {
+    const savedData = await AsyncStorage.getItem('userData');
+    const userData = savedData ? JSON.parse(savedData) : null;
+
     if (!name || !password) {
+      setError('All fields are required.');
       return;
+    }
+
+    if (userData && userData.name === name && userData.password === password) {
+      const payload =userData
+      setError('');
+      showSuccessToast('User Login Successfully!!');
+      navigation.reset({index: 0, routes: [{name: 'Home', params:payload}]});
     } else {
-      console.log('Register Data:', payload);
-      navigation.reset({ index:0, routes:[{name:'Home', params:payload}]})
+      setError('Invalid credentials.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Login</Text>
-      <TextInput
+      <Text style={styles.title}>Login</Text>
+      <CustomInput
         placeholder="Name"
         value={name}
-        onChangeText={text => setName(text)}
-        style={styles.inputText}
-        placeholderTextColor={'gray'}
+        onChangeText={setName}
+        error={error.includes('credentials') ? '' : error}
       />
-      <TextInput
+      <CustomInput
         placeholder="Password"
         value={password}
-        onChangeText={text => setPassword(text)}
-        secureTextEntry={true}
-        style={styles.inputText}
-        placeholderTextColor={'gray'}
+        onChangeText={setPassword}
+        secureTextEntry
+        error={error}
       />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-
-      <View style={styles.lineContainer}>
-        <Text style={styles.staticText}>Don't have an account!!</Text>
-        <Text style={styles.registerText} onPress={()=> navigation.navigate('Register')}>Register</Text>
-      </View>
+      <CustomButton title="Login" onPress={handleLogin} />
+      <Text style={styles.link}>
+        Don't have an account?{' '}
+        <Text
+          style={{color: 'black', fontStyle: 'normal'}}
+          onPress={() => navigation.navigate('Register')}>
+          {' '}
+          Register
+        </Text>
+      </Text>
     </View>
   );
 };
@@ -65,43 +69,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 16,
   },
-  titleText: {
-    textAlign: 'center',
+  title: {
     fontSize: 28,
-    color: 'black',
-    marginVertical: 10,
-  },
-  button: {
-    padding: 15,
-    alignItems: 'center',
-    backgroundColor: 'black',
-    borderRadius: 10,
-    marginVertical: 10,
-  },
-  buttonText: {
     textAlign: 'center',
-    color: 'white',
+    marginBottom: 20,
   },
-  inputText: {
-    padding: 16,
-    borderRadius: 10,
-    borderColor: 'gray',
-    borderWidth: 0.8,
-    marginVertical: 4,
-    color: 'black',
-  },
-  lineContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  link: {
     color: 'gray',
-  },
-  staticText: {
+    textAlign: 'center',
+    marginTop: 20,
     fontStyle: 'italic',
-    marginHorizontal: 4,
-  },
-  registerText: {
-    color: 'black',
-    fontWeight: '700',
   },
 });

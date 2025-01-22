@@ -1,39 +1,50 @@
-import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  FlatList,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 import TodoItem from './TodoItem';
+import {showErrorToast, showSuccessToast} from '../../utils/toastUtils';
+import matrics from '../../constants/matrics';
 
 export default function TodoList() {
   const [tasks, setTasks] = useState([
-    { id: 1, text: 'Task 1', completed: true },
-    { id: 2, text: 'Task 2', completed: false },
+    {id: 1, text: 'Task 1', completed: true},
+    {id: 2, text: 'Task 2', completed: false},
   ]);
   const [text, setText] = useState('');
   const [editingId, setEditingId] = useState(null);
 
   const addTask = () => {
     if (text.trim().length === 0) return;
-    const newTask = { id: Date.now(), text: text.trim(), completed: false };
+    const newTask = {id: Date.now(), text: text.trim(), completed: false};
     setTasks([...tasks, newTask]);
     setText('');
+    showSuccessToast('Task is added successfully!!');
   };
 
-  const deleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const deleteTask = id => {
+    setTasks(tasks.filter(task => task.id !== id));
+    showErrorToast('Task is deleted successfully!!');
   };
 
-  const toggleCompleted = (id) => {
+  const toggleCompleted = id => {
     setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
+      tasks.map(task =>
+        task.id === id ? {...task, completed: !task.completed} : task,
+      ),
     );
   };
 
   const updateTask = (id, newText) => {
     setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, text: newText.trim() } : task
-      )
+      tasks.map(task =>
+        task.id === id ? {...task, text: newText.trim()} : task,
+      ),
     );
     setEditingId(null); // Exit editing mode
   };
@@ -42,18 +53,18 @@ export default function TodoList() {
     <View style={styles.container}>
       <FlatList
         data={tasks}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
+        keyExtractor={item => item.id.toString()}
+        renderItem={({item}) => (
           <TodoItem
             task={item}
             deleteTask={deleteTask}
             toggleCompleted={toggleCompleted}
-            startEditing={(id) => setEditingId(id)}
+            startEditing={id => setEditingId(id)}
             isEditing={editingId === item.id}
             updateTask={updateTask}
           />
         )}
-        contentContainerStyle={{ paddingBottom: 100, marginTop: 16 }}
+        contentContainerStyle={{paddingBottom: 100, marginTop: 16}}
       />
       <View style={styles.inputContainer}>
         <TextInput
@@ -88,7 +99,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 10,
