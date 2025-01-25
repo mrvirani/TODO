@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import TodoItem from './TodoItem';
 import {showErrorToast, showSuccessToast} from '../../utils/toastUtils';
-import matrics from '../../constants/matrics';
 
 export default function TodoList() {
   const [tasks, setTasks] = useState([

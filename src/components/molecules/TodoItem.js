@@ -31,7 +31,7 @@ export default function TodoItem({
           styles.toggleButton,
           {backgroundColor: task?.completed ? '#4CAF50' : '#f1f1f1'},
         ]}
-      />
+      >{task?.completed ? <Text style={{textAlign:'center'}}>✓</Text>: null}</TouchableOpacity>
       {isEditing ? (
         <TextInput
           style={styles.input}
@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     marginRight: 12,
+    justifyContent:'center',
   },
   taskText: {
     flex: 1,
